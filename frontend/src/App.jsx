@@ -1,18 +1,20 @@
-/** Compose only the identity slice; feature destinations are added by later slices. */
+/** Compose identity and public discovery; post reading and CRUD arrive in later slices. */
 import { useEffect, useState } from "react";
-import { Navigate, Routes, Route } from "react-router-dom";
+import { Navigate, Routes, Route, useLocation } from "react-router-dom";
 import { getSession, getRoleHome } from "./utils/auth.js";
 import { PublicNavbar } from "./components/PublicNavbar.jsx";
 import { Navbar } from "./components/Navbar.jsx";
 import { ProtectedRoute } from "./components/ProtectedRoute.jsx";
+import LandingPage from "./pages/LandingPage.jsx";
 import LoginPage from "./pages/LoginPage.jsx";
 import RegisterPage from "./pages/RegisterPage.jsx";
 
-/** Render identity routes and synchronize persisted session changes without Context.
- * @returns {JSX.Element} Available application routes.
+/** Render available routes and synchronize persisted session changes without Context.
+ * @returns {JSX.Element} Public discovery and guarded identity routes.
  */
 export default function App() {
   const [session, setSession] = useState(getSession);
+  const { pathname } = useLocation();
   useEffect(() => {
     /** Refresh identity after storage changes in another tab.
      * @returns {void}
@@ -36,13 +38,13 @@ export default function App() {
       >
         Skip to content
       </a>
-      {session ? (
+      {session && pathname !== "/" ? (
         <Navbar session={session} onSessionChange={setSession} />
       ) : (
-        <PublicNavbar />
+        <PublicNavbar session={session} />
       )}
       <Routes>
-        <Route path="/" element={identity} />
+        <Route path="/" element={<LandingPage session={session} />} />
         <Route
           path="/login"
           element={
@@ -61,6 +63,15 @@ export default function App() {
         />
         <Route
           path="/blogs"
+          element={
+            <ProtectedRoute>
+              {identity}
+            </ProtectedRoute>
+          }
+        />
+        {/* Keep preview access guarded until the post slice replaces this identity view. */}
+        <Route
+          path="/blog/:id"
           element={
             <ProtectedRoute>
               {identity}
