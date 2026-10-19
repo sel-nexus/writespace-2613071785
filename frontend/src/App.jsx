@@ -1,4 +1,4 @@
-/** Compose public discovery, identity and protected post workflows; admin is interim. */
+/** Compose public discovery, identity, protected posts and administrator workflows. */
 import { useEffect, useState } from "react";
 import { Navigate, Routes, Route, useLocation } from "react-router-dom";
 import { getSession, getRoleHome } from "./utils/auth.js";
@@ -11,6 +11,8 @@ import RegisterPage from "./pages/RegisterPage.jsx";
 import Home from "./pages/Home.jsx";
 import ReadBlog from "./pages/ReadBlog.jsx";
 import WriteBlog from "./pages/WriteBlog.jsx";
+import AdminDashboard from "./pages/AdminDashboard.jsx";
+import UserManagement from "./pages/UserManagement.jsx";
 
 /** Render available routes and synchronize persisted session changes without Context.
  * @returns {JSX.Element} Public discovery and guarded identity routes.
@@ -96,7 +98,19 @@ export default function App() {
         />
         <Route
           path="/admin"
-          element={<ProtectedRoute role="admin">{identity}</ProtectedRoute>}
+          element={
+            <ProtectedRoute role="admin">
+              <AdminDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/users"
+          element={
+            <ProtectedRoute role="admin">
+              <UserManagement />
+            </ProtectedRoute>
+          }
         />
         <Route
           path="*"

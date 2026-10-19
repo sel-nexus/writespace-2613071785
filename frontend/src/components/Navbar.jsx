@@ -21,9 +21,15 @@ export function Navbar({ session, onSessionChange, links = [] }) {
   const available = [
     { to: "/blogs", label: "All Blogs" },
     { to: "/write", label: "Write" },
+    ...(session.role === "admin"
+      ? [
+          { to: "/admin", label: "Dashboard" },
+          { to: "/users", label: "Users" },
+        ]
+      : []),
     ...links.filter(
       (link) =>
-        !["/blogs", "/write"].includes(link.to) &&
+        !["/blogs", "/write", "/admin", "/users"].includes(link.to) &&
         (!link.role || link.role === session.role),
     ),
   ];

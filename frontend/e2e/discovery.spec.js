@@ -236,6 +236,12 @@ for (const role of ["user", "admin"]) {
     );
     const roleHome = role === "admin" ? /\/admin$/ : /\/blogs$/;
     await expect(page).toHaveURL(roleHome);
+    await expect(
+      page.getByRole("heading", {
+        name: role === "admin" ? "Admin Dashboard" : "All Blogs",
+        exact: true,
+      }),
+    ).toBeVisible();
     await page.getByRole("link", { name: "WriteSpace", exact: true }).click();
     await expect(page).toHaveURL(/\/$/);
     const publicNav = page.getByRole("navigation", {

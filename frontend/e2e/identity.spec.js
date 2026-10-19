@@ -138,18 +138,20 @@ test("built-in admin enters guarded role route, persists and logs out", async ({
   await login(page, "admin", "admin");
   await expect(page).toHaveURL(/\/admin$/);
   await expect(
-    page.getByRole("heading", { name: "Welcome, Admin" }),
+    page.getByRole("heading", { name: "Admin Dashboard" }),
   ).toBeVisible();
   await expect(
     page.getByRole("img", { name: "Admin avatar" }).first(),
   ).toBeVisible();
   await page.reload();
   await expect(
-    page.getByRole("heading", { name: "Welcome, Admin" }),
+    page.getByRole("heading", { name: "Admin Dashboard" }),
   ).toBeVisible();
   await expect(
-    page.getByRole("link", { name: "Users", exact: true }),
-  ).toHaveCount(0);
+    page
+      .getByRole("navigation", { name: "Account navigation", exact: true })
+      .getByRole("link", { name: "Users", exact: true }),
+  ).toHaveAttribute("href", "/users");
   await logout(page, "Admin");
   expect(
     await page.evaluate(() => localStorage.getItem("writespace_session")),

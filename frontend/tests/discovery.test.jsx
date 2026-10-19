@@ -497,6 +497,12 @@ describe("public landing and App wiring", () => {
       .setup()
       .click(within(publicNav).getByRole("link", { name: "Go to Dashboard" }));
     expect(screen.getByLabelText("Current route")).toHaveTextContent(path);
+    expect(
+      screen.getByRole("heading", {
+        name: session.role === "admin" ? "Admin Dashboard" : "All Blogs",
+        exact: true,
+      }),
+    ).toBeVisible();
   });
 
   it.each([

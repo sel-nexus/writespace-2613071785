@@ -961,7 +961,7 @@ describe("App.jsx available identity routing", () => {
         "/admin",
       );
       expect(
-        screen.getByRole("heading", { name: "Welcome, Admin" }),
+        screen.getByRole("heading", { name: "Admin Dashboard" }),
       ).toBeInTheDocument();
     },
   );

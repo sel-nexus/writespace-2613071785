@@ -245,9 +245,9 @@ test("second user can read but cannot edit/delete another writer; admin can main
   await page.getByLabel("Password", { exact: true }).fill("admin");
   await page.getByRole("button", { name: "Login", exact: true }).click();
   await expect(page).toHaveURL(/\/admin$/);
-  // Admin dashboard remains the temporary identity page until its own slice.
+  // The final dashboard is the administrator's role home.
   await expect(
-    page.getByRole("heading", { name: "Welcome, Admin" }),
+    page.getByRole("heading", { name: "Admin Dashboard" }),
   ).toBeVisible();
   await nav(page, testInfo, "All Blogs");
   await page
