@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import { Avatar } from "./Avatar.jsx";
-import { clearSession, getRoleHome } from "../utils/auth.js";
+import { clearSession } from "../utils/auth.js";
 
 /** Render account navigation with mobile and account disclosures.
  * @param {object} props Component props.
@@ -19,8 +19,13 @@ export function Navbar({ session, onSessionChange, links = [] }) {
   const location = useLocation();
   const navigate = useNavigate();
   const available = [
-    { to: getRoleHome(session), label: "My account" },
-    ...links.filter((link) => !link.role || link.role === session.role),
+    { to: "/blogs", label: "All Blogs" },
+    { to: "/write", label: "Write" },
+    ...links.filter(
+      (link) =>
+        !["/blogs", "/write"].includes(link.to) &&
+        (!link.role || link.role === session.role),
+    ),
   ];
 
   useEffect(() => {

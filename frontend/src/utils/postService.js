@@ -1,5 +1,114 @@
-/** Discover browser-local posts without adding persistence mutations or CRUD. */
-import { getPosts, getUsers, isId } from "./storage.js";
+/** Discover and maintain plain-text browser-local posts; client controls are demo-only. */
+import { getPosts, savePosts, getUsers, isId, isText } from "./storage.js";
+import { getSession } from "./auth.js";
+
+/** Validate required text without changing the writer's whitespace.
+ * @param {*} values Candidate title and content.
+ * @returns {object} Inline field errors, empty for valid input.
+ */
+export function validatePost(values) {
+  const errors = {};
+  if (!isText(values?.title)) errors.title = "Title is required.";
+  if (!isText(values?.content)) errors.content = "Content is required.";
+  return errors;
+}
+
+/** Read a matching validated post, never an invented fallback.
+ * @param {*} id Candidate UUID.
+ * @returns {object|null} Stored record or null for invalid/missing IDs and failed reads.
+ */
+export function getPostById(id) {
+  if (!isId(id)) return null;
+  return getPosts().find((post) => post.id === id) || null;
+}
+
+/** Resolve the current identity and reject a stale or forged caller snapshot.
+ * @param {object|undefined} supplied Optional identity snapshot from the calling page.
+ * @returns {object} Current validated session.
+ * @throws {Error} When logged out, invalid, or different from the current identity.
+ */
+function requireSession(supplied) {
+  const current = getSession();
+  if (
+    !current ||
+    (supplied !== undefined &&
+      (!supplied ||
+        ["userId", "username", "displayName", "role"].some(
+          (key) => supplied[key] !== current[key],
+        )))
+  ) {
+    throw new Error("Please log in again before changing posts.");
+  }
+  return current;
+}
+
+/** Reject missing records and enforce ownership using the freshly read identity.
+ * @param {object} session Current validated session.
+ * @param {object|null} post Stored record.
+ * @returns {void}
+ * @throws {Error} For missing posts or forbidden edits/deletions.
+ */
+function requireOwnership(session, post) {
+  if (!post) throw new Error("Post not found");
+  if (!canEditPost(session, post)) {
+    throw new Error("You can only change your own posts.");
+  }
+}
+
+/** Create a post with browser-generated identity and authoritative author metadata.
+ * @param {object} values Required title/content; caller metadata is ignored.
+ * @param {object} [supplied] Optional current identity snapshot.
+ * @returns {object} Post only after persistence succeeds.
+ * @throws {Error} For invalid input, unauthorized access or failed persistence.
+ */
+export function createPost(values, supplied) {
+  const session = requireSession(supplied);
+  const errors = validatePost(values);
+  if (Object.keys(errors).length) throw new Error(Object.values(errors)[0]);
+  const post = {
+    id: crypto.randomUUID(),
+    title: values.title,
+    content: values.content,
+    createdAt: new Date().toISOString(),
+    authorId: session.userId,
+    authorName: session.displayName,
+  };
+  savePosts([...getPosts(), post]);
+  return post;
+}
+
+/** Update only text fields while preserving the original ID, author and creation date.
+ * @param {*} id Post UUID.
+ * @param {object} values Required title/content.
+ * @param {object} [supplied] Optional current identity snapshot.
+ * @returns {object} Updated persisted post.
+ * @throws {Error} For missing posts, forbidden access, invalid text or failed saves.
+ */
+export function updatePost(id, values, supplied) {
+  const session = requireSession(supplied);
+  const posts = getPosts();
+  const original = isId(id) ? posts.find((post) => post.id === id) : null;
+  requireOwnership(session, original);
+  const errors = validatePost(values);
+  if (Object.keys(errors).length) throw new Error(Object.values(errors)[0]);
+  const updated = { ...original, title: values.title, content: values.content };
+  savePosts(posts.map((post) => (post.id === id ? updated : post)));
+  return updated;
+}
+
+/** Delete a permitted existing post; confirmation belongs to the caller's UI.
+ * @param {*} id Post UUID.
+ * @param {object} [supplied] Optional current identity snapshot.
+ * @returns {void}
+ * @throws {Error} For missing posts, forbidden access or failed persistence.
+ */
+export function deletePost(id, supplied) {
+  const session = requireSession(supplied);
+  const posts = getPosts();
+  const post = isId(id) ? posts.find((record) => record.id === id) : null;
+  requireOwnership(session, post);
+  savePosts(posts.filter((record) => record.id !== id));
+}
 
 const ACCENTS = [
   "border-indigo-500",

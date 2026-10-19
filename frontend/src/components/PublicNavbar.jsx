@@ -32,7 +32,7 @@ export function PublicNavbar({ session = null }) {
               to={getRoleHome(session)}
               className="rounded-lg px-3 py-2 text-sm font-semibold text-indigo-600 focus-visible:ring-2 focus-visible:ring-indigo-500"
             >
-              My account
+              Go to Dashboard
             </Link>
           </div>
         ) : (

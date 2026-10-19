@@ -1,4 +1,4 @@
-/** Compose identity and public discovery; post reading and CRUD arrive in later slices. */
+/** Compose public discovery, identity and protected post workflows; admin is interim. */
 import { useEffect, useState } from "react";
 import { Navigate, Routes, Route, useLocation } from "react-router-dom";
 import { getSession, getRoleHome } from "./utils/auth.js";
@@ -8,6 +8,9 @@ import { ProtectedRoute } from "./components/ProtectedRoute.jsx";
 import LandingPage from "./pages/LandingPage.jsx";
 import LoginPage from "./pages/LoginPage.jsx";
 import RegisterPage from "./pages/RegisterPage.jsx";
+import Home from "./pages/Home.jsx";
+import ReadBlog from "./pages/ReadBlog.jsx";
+import WriteBlog from "./pages/WriteBlog.jsx";
 
 /** Render available routes and synchronize persisted session changes without Context.
  * @returns {JSX.Element} Public discovery and guarded identity routes.
@@ -26,9 +29,7 @@ export default function App() {
     return () => window.removeEventListener("storage", syncSession);
   }, []);
 
-  const identity = (
-    <LoginPage session={session} onSessionChange={setSession} />
-  );
+  const identity = <LoginPage session={session} onSessionChange={setSession} />;
 
   return (
     <div className="min-h-screen bg-slate-50 font-sans text-slate-800">
@@ -65,26 +66,37 @@ export default function App() {
           path="/blogs"
           element={
             <ProtectedRoute>
-              {identity}
+              <Home />
             </ProtectedRoute>
           }
         />
-        {/* Keep preview access guarded until the post slice replaces this identity view. */}
         <Route
           path="/blog/:id"
           element={
             <ProtectedRoute>
-              {identity}
+              <ReadBlog />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/write"
+          element={
+            <ProtectedRoute>
+              <WriteBlog />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/edit/:id"
+          element={
+            <ProtectedRoute>
+              <WriteBlog />
             </ProtectedRoute>
           }
         />
         <Route
           path="/admin"
-          element={
-            <ProtectedRoute role="admin">
-              {identity}
-            </ProtectedRoute>
-          }
+          element={<ProtectedRoute role="admin">{identity}</ProtectedRoute>}
         />
         <Route
           path="*"

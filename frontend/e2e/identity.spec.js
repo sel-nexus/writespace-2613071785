@@ -13,7 +13,7 @@ async function logout(page, name) {
   await page.getByRole("button", { name: "Logout", exact: true }).click();
   await expect(page).toHaveURL(/\/$/);
   await expect(
-    page.getByRole("heading", { name: "Welcome back" }),
+    page.getByRole("heading", { level: 1, name: "WriteSpace" }),
   ).toBeVisible();
 }
 
@@ -47,29 +47,36 @@ test("register, persist, navigate available account route, logout and login agai
   await page.getByRole("button", { name: "Register", exact: true }).click();
   await expect(page).toHaveURL(/\/blogs$/);
   await expect(
-    page.getByRole("heading", { name: "Welcome, Mira Writer" }),
+    page.getByRole("heading", { name: "All Blogs", exact: true }),
   ).toBeVisible();
   await expect(
     page.getByRole("img", { name: "User avatar" }).first(),
   ).toBeVisible();
   await expect(
-    page.getByRole("link", { name: "Write", exact: true }),
-  ).toHaveCount(0);
+    page.getByText("No blogs yet. Be the first to write one!"),
+  ).toBeVisible();
   await page.reload();
   await expect(
-    page.getByRole("heading", { name: "Welcome, Mira Writer" }),
+    page.getByRole("heading", { name: "All Blogs", exact: true }),
   ).toBeVisible();
-  await page.getByRole("link", { name: "WriteSpace", exact: true }).click();
+  // Exercise the real Write -> All Blogs links and mobile menu closure.
+  await page
+    .locator("main")
+    .getByRole("link", { name: "Write", exact: true })
+    .click();
+  await expect(
+    page.getByRole("heading", { name: "Write a Blog" }),
+  ).toBeVisible();
   if (testInfo.project.name === "mobile") {
     await page.getByRole("button", { name: "Toggle navigation" }).click();
     await page
       .getByRole("navigation", { name: "Mobile navigation" })
-      .getByRole("link", { name: "My account" })
+      .getByRole("link", { name: "All Blogs" })
       .click();
   } else {
     await page
       .getByRole("navigation", { name: "Account navigation", exact: true })
-      .getByRole("link", { name: "My account" })
+      .getByRole("link", { name: "All Blogs" })
       .click();
   }
   await expect(page).toHaveURL(/\/blogs$/);
@@ -81,7 +88,7 @@ test("register, persist, navigate available account route, logout and login agai
   await login(page, "mira", "made-up-demo");
   await expect(page).toHaveURL(/\/blogs$/);
   await expect(
-    page.getByRole("heading", { name: "Welcome, Mira Writer" }),
+    page.getByRole("heading", { name: "All Blogs", exact: true }),
   ).toBeVisible();
   const persisted = await page.evaluate(() => ({
     users: JSON.parse(localStorage.getItem("writespace_users")),

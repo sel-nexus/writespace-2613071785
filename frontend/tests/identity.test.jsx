@@ -579,10 +579,9 @@ describe("PublicNavbar.jsx", () => {
     (session, destination) => {
       routed(<PublicNavbar session={session} />);
       expect(screen.getByText(session.displayName)).toBeInTheDocument();
-      expect(screen.getByRole("link", { name: "My account" })).toHaveAttribute(
-        "href",
-        destination,
-      );
+      expect(
+        screen.getByRole("link", { name: "Go to Dashboard" }),
+      ).toHaveAttribute("href", destination);
       expect(
         screen.queryByRole("link", { name: "Login" }),
       ).not.toBeInTheDocument();
@@ -603,11 +602,11 @@ describe("Navbar.jsx", () => {
       <Navbar session={identity} onSessionChange={onSessionChange} />,
       "/blogs",
     );
-    expect(screen.getByRole("link", { name: "My account" })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: "All Blogs" })).toHaveAttribute(
       "aria-current",
       "page",
     );
-    expect(screen.getByRole("link", { name: "My account" })).toHaveClass(
+    expect(screen.getByRole("link", { name: "All Blogs" })).toHaveClass(
       "bg-indigo-600",
     );
     const toggle = screen.getByRole("button", { name: "Toggle navigation" });
@@ -617,7 +616,7 @@ describe("Navbar.jsx", () => {
     expect(
       within(
         screen.getByRole("navigation", { name: "Mobile navigation" }),
-      ).getByRole("link", { name: "My account" }),
+      ).getByRole("link", { name: "All Blogs" }),
     ).toHaveAttribute("href", "/blogs");
     await user.click(toggle);
     expect(
@@ -789,7 +788,9 @@ describe("LoginPage.jsx", () => {
       }),
     ).toBeInTheDocument();
     expect(document.querySelector("script")).toBeNull();
-    expect(screen.getByText("You are signed in on this browser.")).toHaveAttribute("role", "status");
+    expect(
+      screen.getByText("You are signed in on this browser."),
+    ).toHaveAttribute("role", "status");
     expect(screen.queryByLabelText("Password")).not.toBeInTheDocument();
   });
 });
@@ -901,25 +902,31 @@ describe("App.jsx available identity routing", () => {
     await user.click(screen.getByRole("link", { name: "Get Started" }));
     await fillRegistration(user);
     await user.click(screen.getByRole("button", { name: "Register" }));
-    expect(
-      screen.getByRole("heading", { name: "Welcome, Alice" }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "All Blogs" })).toBeVisible();
     expect(screen.getByLabelText("Current route")).toHaveTextContent("/blogs");
+    const navigation = screen.getByRole("navigation", {
+      name: "Account navigation",
+      exact: true,
+    });
     expect(
-      screen.queryByRole("link", { name: "Write" }),
-    ).not.toBeInTheDocument();
+      within(navigation).getByRole("link", { name: "Write" }),
+    ).toHaveAttribute("href", "/write");
+    expect(
+      within(navigation).getByRole("link", { name: "All Blogs" }),
+    ).toHaveAttribute("href", "/blogs");
     cleanup();
     routed(<App />, "/blogs");
+    expect(screen.getByRole("heading", { name: "All Blogs" })).toBeVisible();
     expect(
-      screen.getByRole("heading", { name: "Welcome, Alice" }),
-    ).toBeInTheDocument();
+      screen.getByRole("button", { name: "Account options for Alice" }),
+    ).toBeVisible();
     await user.click(
       screen.getByRole("button", { name: "Account options for Alice" }),
     );
     await user.click(screen.getByRole("button", { name: "Logout" }));
     expect(
-      screen.getByRole("heading", { name: "Welcome back" }),
-    ).toBeInTheDocument();
+      screen.getByRole("heading", { level: 1, name: "WriteSpace" }),
+    ).toBeVisible();
     expect(getSession()).toBeNull();
     expect(getUsers()).toHaveLength(1);
   });
@@ -945,7 +952,7 @@ describe("App.jsx available identity routing", () => {
         "/blogs",
       );
       expect(
-        screen.getByRole("heading", { name: "Welcome, Alice" }),
+        screen.getByRole("heading", { name: "All Blogs" }),
       ).toBeInTheDocument();
       cleanup();
       setSession(ADMIN_SESSION);
@@ -965,7 +972,7 @@ describe("App.jsx available identity routing", () => {
     routed(<App />, "/admin");
     expect(screen.getByLabelText("Current route")).toHaveTextContent("/blogs");
     cleanup();
-    routed(<App />, "/write");
+    routed(<App />, "/unknown");
     expect(screen.getByLabelText("Current route")).toHaveTextContent("/blogs");
     expect(
       screen.queryByRole("link", { name: "Users" }),
@@ -988,7 +995,7 @@ describe("App.jsx available identity routing", () => {
     localStorage.setItem("writespace_users", "[null]");
     routed(<App />);
     expect(
-      screen.getByRole("heading", { name: "Welcome back" }),
+      screen.getByRole("heading", { level: 1, name: "WriteSpace" }),
     ).toBeInTheDocument();
   });
 });
