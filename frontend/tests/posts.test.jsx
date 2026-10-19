@@ -65,7 +65,7 @@ beforeEach(() => {
 });
 
 /** Render actual routes, services and storage rather than mocked pages.
- * @param {string} route Initial browser-equivalent entry.
+ * @param {string|object} route Initial browser-equivalent entry.
  * @returns {object} Testing Library result.
  */
 function open(route) {
@@ -324,6 +324,44 @@ describe("storage-backed post CRUD", () => {
 });
 
 describe("post pages and routes", () => {
+  it.each([
+    ["/admin", "write", "Admin Dashboard"],
+    ["/blogs", "write", "All Blogs"],
+    ["/blogs", "edit", "All Blogs"],
+    [`/blog/${post.id}`, "write", post.title],
+    [`/blog/${post.id}`, "edit", post.title],
+  ])("cancels %s-origin %s back to the origin without storage changes", async (origin, action, heading) => {
+    if (origin === "/admin") setSession(ADMIN_SESSION);
+    savePosts([post]);
+    const snapshot = { ...localStorage };
+    open(origin);
+    const user = userEvent.setup();
+    const link = action === "write"
+      ? within(screen.getByRole("navigation", { name: "Account navigation" })).getByRole("link", { name: "Write", exact: true })
+      : screen.getByRole("link", { name: origin === "/blogs" ? `Edit ${post.title}` : "Edit", exact: true });
+    await user.click(link);
+    expect(screen.getByLabelText("Title")).toBeVisible();
+    fill();
+    await user.click(screen.getByRole("button", { name: "Cancel" }));
+    expect(screen.getByRole("heading", { name: heading, exact: true })).toBeVisible();
+    expect(screen.queryByLabelText("Content")).not.toBeInTheDocument();
+    expect({ ...localStorage }).toEqual(snapshot);
+  });
+
+  it.each([
+    ["/write", "All Blogs"],
+    [`/edit/${post.id}`, post.title],
+  ])("uses a safe local fallback for direct-entry %s without saving", async (pathname, heading) => {
+    savePosts([post]);
+    const snapshot = { ...localStorage };
+    open({ pathname, key: "default", state: { from: "https://example.com", origin: "//example.com" } });
+    fill();
+    await userEvent.setup().click(screen.getByRole("button", { name: "Cancel" }));
+    expect(screen.getByRole("heading", { name: heading, exact: true })).toBeVisible();
+    expect(screen.queryByLabelText("Content")).not.toBeInTheDocument();
+    expect({ ...localStorage }).toEqual(snapshot);
+  });
+
   it.each(["/blogs", "/write", `/edit/${post.id}`, `/blog/${post.id}`])(
     "redirects guest %s to login",
     (route) => {
@@ -356,7 +394,7 @@ describe("post pages and routes", () => {
       fill();
       await userEvent
         .setup()
-        .click(screen.getByRole("link", { name: "Cancel" }));
+        .click(screen.getByRole("button", { name: "Cancel" }));
       expect(screen.getByRole("heading", { name: "All Blogs" })).toBeVisible();
       expect(getPosts()).toEqual([]);
     },
@@ -471,7 +509,7 @@ describe("post pages and routes", () => {
     expect(screen.getAllByRole("alert")).toHaveLength(2);
     expect(getPostById(post.id)).toEqual(post);
     fill();
-    await user.click(screen.getByRole("link", { name: "Cancel" }));
+    await user.click(screen.getByRole("button", { name: "Cancel" }));
     expect(screen.getByRole("heading", { name: post.title })).toBeVisible();
     expect(getPostById(post.id)).toEqual(post);
     await user.click(screen.getByRole("link", { name: "Edit", exact: true }));

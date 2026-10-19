@@ -80,9 +80,13 @@ test("register, persist, navigate available account route, logout and login agai
       .click();
   }
   await expect(page).toHaveURL(/\/blogs$/);
-  await expect(
-    page.getByRole("button", { name: "Toggle navigation" }),
-  ).toHaveAttribute("aria-expanded", "false");
+  if (testInfo.project.name === "mobile") {
+    await expect(
+      page.getByRole("button", { name: "Toggle navigation" }),
+    ).toHaveAttribute("aria-expanded", "false");
+  } else {
+    await expect(page.getByRole("navigation", { name: "Account navigation", exact: true })).toBeVisible();
+  }
   await logout(page, "Mira Writer");
   await page.getByRole("link", { name: "Login", exact: true }).first().click();
   await login(page, "mira", "made-up-demo");
@@ -129,7 +133,7 @@ test("register, persist, navigate available account route, logout and login agai
 
 test("built-in admin enters guarded role route, persists and logs out", async ({
   page,
-}) => {
+}, testInfo) => {
   await page.goto("/admin");
   await expect(page).toHaveURL(/\/login$/);
   await expect(page.getByText(/Demo administrator:/)).toHaveText(
@@ -147,9 +151,12 @@ test("built-in admin enters guarded role route, persists and logs out", async ({
   await expect(
     page.getByRole("heading", { name: "Admin Dashboard" }),
   ).toBeVisible();
+  if (testInfo.project.name === "mobile") {
+    await page.getByRole("button", { name: "Toggle navigation" }).click();
+  }
   await expect(
     page
-      .getByRole("navigation", { name: "Account navigation", exact: true })
+      .getByRole("navigation", { name: testInfo.project.name === "mobile" ? "Mobile navigation" : "Account navigation", exact: true })
       .getByRole("link", { name: "Users", exact: true }),
   ).toHaveAttribute("href", "/users");
   await logout(page, "Admin");

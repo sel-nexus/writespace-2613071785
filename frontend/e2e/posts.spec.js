@@ -136,7 +136,7 @@ test("register, validate, create, read, reload, cancel edits, save edits and con
   );
   await page.getByLabel("Title", { exact: true }).fill("Unsaved title");
   await page.getByLabel("Content", { exact: true }).fill("Unsaved words");
-  await page.getByRole("link", { name: "Cancel", exact: true }).click();
+  await page.getByRole("button", { name: "Cancel", exact: true }).click();
   await expect(
     page.getByRole("heading", { name: created.title, exact: true }),
   ).toBeVisible();
@@ -166,8 +166,13 @@ test("register, validate, create, read, reload, cancel edits, save edits and con
   await nav(page, testInfo, "Write");
   await page.getByLabel("Title", { exact: true }).fill("Never saved");
   await page.getByLabel("Content", { exact: true }).fill("Cancelled creation");
-  await page.getByRole("link", { name: "Cancel", exact: true }).click();
+  await page.getByRole("button", { name: "Cancel", exact: true }).click();
+  await expect(page).toHaveURL(new RegExp(`/blog/${revised.id}$`));
+  await expect(
+    page.getByRole("heading", { name: revised.title, exact: true }),
+  ).toBeVisible();
   expect(await storedPosts(page)).toEqual([revised]);
+  await page.getByRole("link", { name: "Back to All Posts", exact: true }).click();
   const grid = page.getByRole("region", { name: "All posts", exact: true });
   const columns = await grid.evaluate(
     (element) =>
@@ -281,6 +286,76 @@ test("second user can read but cannot edit/delete another writer; admin can main
     page.getByRole("heading", { name: "All Blogs", exact: true }),
   ).toBeVisible();
   expect(await storedPosts(page)).toEqual([]);
+});
+
+/** Seed valid identity and foreign writing only before an isolated direct-entry test.
+ * @param {object} page Playwright page using the unchanged shared error fixture.
+ * @returns {Promise<object>} Raw storage snapshot for exact non-mutation checks.
+ */
+async function seedDirectEntry(page) {
+  const owner = {
+    id: "12345678-1234-4234-8234-123456789abc",
+    displayName: "Owner",
+    username: "owner",
+    password: "posts-demo",
+    role: "user",
+    createdAt: "2026-01-01T12:00:00.000Z",
+  };
+  const reader = {
+    ...owner,
+    id: "32345678-1234-4234-8234-123456789abc",
+    displayName: "Ordinary Reader",
+    username: "reader",
+  };
+  const snapshot = {
+    writespace_users: JSON.stringify([owner, reader]),
+    writespace_session: JSON.stringify({
+      userId: reader.id,
+      username: reader.username,
+      displayName: reader.displayName,
+      role: reader.role,
+    }),
+    writespace_posts: JSON.stringify([{
+      id: "22345678-1234-4234-8234-123456789abc",
+      title: "Foreign-owned post",
+      content: originalContent,
+      createdAt: "2026-03-04T12:00:00.000Z",
+      authorId: owner.id,
+      authorName: owner.displayName,
+    }]),
+  };
+  await page.addInitScript((data) => {
+    localStorage.clear();
+    for (const [key, value] of Object.entries(data)) localStorage.setItem(key, value);
+  }, snapshot);
+  return snapshot;
+}
+
+test("signed-in initial-entry missing UUID reader shows not-found and returns to all posts", async ({ page }) => {
+  const snapshot = await seedDirectEntry(page);
+  await page.goto("/blog/92345678-1234-4234-8234-123456789abc");
+  await expect(page).toHaveURL(/\/blog\/92345678-1234-4234-8234-123456789abc$/);
+  await expect(page.getByRole("heading", { name: "Post not found", exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Account options for Ordinary Reader" })).toBeVisible();
+  expect(await page.evaluate(() => ({ ...localStorage }))).toEqual(snapshot);
+  await page.getByRole("link", { name: "Back to All Posts", exact: true }).click();
+  await expect(page).toHaveURL(/\/blogs$/);
+  await expect(page.getByRole("heading", { name: "All Blogs", exact: true })).toBeVisible();
+  expect(await page.evaluate(() => ({ ...localStorage }))).toEqual(snapshot);
+});
+
+test("signed-in ordinary user initial-entry foreign edit redirects without editor or storage changes", async ({ page }) => {
+  const snapshot = await seedDirectEntry(page);
+  await page.goto("/edit/22345678-1234-4234-8234-123456789abc");
+  await expect(page).toHaveURL(/\/blogs$/);
+  await expect(page.getByRole("heading", { name: "All Blogs", exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Account options for Ordinary Reader" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Edit Post", exact: true })).toHaveCount(0);
+  await expect(page.getByLabel("Title", { exact: true })).toHaveCount(0);
+  await expect(page.getByLabel("Content", { exact: true })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Save", exact: true })).toHaveCount(0);
+  await expect(page.getByRole("link", { name: "Edit Foreign-owned post", exact: true })).toHaveCount(0);
+  expect(await page.evaluate(() => ({ ...localStorage }))).toEqual(snapshot);
 });
 
 for (const route of [

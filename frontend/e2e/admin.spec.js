@@ -103,8 +103,8 @@ test("admin login, empty counts, quick write, recent edit and cancel/confirm del
     ["Total users", "1"],
   ]) {
     await expect(
-      page.getByRole("region", { name: label, exact: true }),
-    ).toContainText(value);
+      page.getByRole("region", { name: label, exact: true }).locator(":scope > p"),
+    ).toHaveText(value);
   }
   await expect(page.getByText(/Product clarification/)).toContainText(
     "duplicate product labels",
@@ -169,8 +169,10 @@ test("admin login, empty counts, quick write, recent edit and cancel/confirm del
     })
     .click();
   await expect(
-    page.getByRole("region", { name: "Total Posts", exact: true }),
-  ).toContainText("0");
+    page
+      .getByRole("region", { name: "Total Posts", exact: true })
+      .locator(":scope > p"),
+  ).toHaveText("0");
   expect((await stored(page)).posts).toEqual([]);
   await page.reload();
   await expect(page.getByText(/No posts yet. Write a new post/)).toBeVisible();
@@ -184,6 +186,12 @@ test("manage both roles, login created accounts, own posts and protect default/c
   await page.getByRole("link", { name: "Manage Users", exact: true }).click();
   await expect(page).toHaveURL(/\/users$/);
   const list = accountList(page, testInfo);
+  await expect(list).toBeVisible();
+  await page.getByRole("link", { name: "Back to Dashboard", exact: true }).click();
+  await expect(page).toHaveURL(/\/admin$/);
+  await nav(page, testInfo, "Users");
+  await expect(page).toHaveURL(/\/users$/);
+  await expect(list).toBeVisible();
   const defaultDelete = list.getByRole("button", {
     name: "Delete admin",
     exact: true,
@@ -251,6 +259,13 @@ test("manage both roles, login created accounts, own posts and protect default/c
     page.getByRole("heading", { name: "Admin Dashboard", exact: true }),
   ).toBeVisible();
   await page.getByRole("link", { name: "Manage Users", exact: true }).click();
+  await expect(page).toHaveURL(/\/users$/);
+  await expect(list).toBeVisible();
+  await page.getByRole("link", { name: "Back to Dashboard", exact: true }).click();
+  await expect(page).toHaveURL(/\/admin$/);
+  await nav(page, testInfo, "Users");
+  await expect(page).toHaveURL(/\/users$/);
+  await expect(list).toBeVisible();
   await expect(
     list.getByRole("button", { name: "Delete created-editor", exact: true }),
   ).toBeDisabled();
@@ -278,12 +293,11 @@ test("manage both roles, login created accounts, own posts and protect default/c
   await expect(page.locator("main article")).toContainText(authored.content);
   await expect(page.locator("main article")).toContainText("Created Writer");
   await nav(page, testInfo, "Dashboard");
-  await expect(
-    page.getByRole("region", { name: "Total Users", exact: true }),
-  ).toContainText("2");
-  await expect(
-    page.getByRole("region", { name: "Total users", exact: true }),
-  ).toContainText("2");
+  for (const label of ["Total Users", "Total users"]) {
+    await expect(
+      page.getByRole("region", { name: label, exact: true }).locator(":scope > p"),
+    ).toHaveText("2");
+  }
   await page.reload();
   expect((await stored(page)).posts).toEqual([authored]);
   await page.getByRole("link", { name: "Write New Post", exact: true }).click();
@@ -363,6 +377,64 @@ test("dashboard selects latest five from shuffled persisted posts with inline ma
 });
 
 for (const route of ["/admin", "/users"]) {
+  test(`ordinary-user initial entry ${route} redirects without privileged access or mutation`, async ({
+    page,
+  }, testInfo) => {
+    const account = {
+      id: "12345678-1234-4234-8234-123456789abc",
+      displayName: "Ordinary Writer",
+      username: "ordinary-writer",
+      password: "demo-only",
+      role: "user",
+      createdAt: "2026-03-04T12:00:00.000Z",
+    };
+    const records = {
+      users: [account],
+      posts: [{
+        id: "22345678-1234-4234-8234-123456789abc",
+        title: "Ordinary writer's persisted note",
+        content: "This record must survive restricted route entry unchanged.",
+        authorId: account.id,
+        authorName: account.displayName,
+        createdAt: "2026-03-05T12:00:00.000Z",
+      }],
+      session: {
+        userId: account.id,
+        username: account.username,
+        displayName: account.displayName,
+        role: account.role,
+      },
+    };
+    await page.addInitScript((seed) => {
+      if (!sessionStorage.getItem("ordinary-user-seeded")) {
+        localStorage.setItem("writespace_users", JSON.stringify(seed.users));
+        localStorage.setItem("writespace_posts", JSON.stringify(seed.posts));
+        localStorage.setItem("writespace_session", JSON.stringify(seed.session));
+        sessionStorage.setItem("ordinary-user-seeded", "true");
+      }
+    }, records);
+    await page.goto(route);
+    await expect(page).toHaveURL(/\/blogs$/);
+    for (const name of ["Admin Dashboard", "Manage Users"]) {
+      await expect(page.getByRole("heading", { name, exact: true })).toHaveCount(0);
+    }
+    await expect(page.getByRole("region", { name: "Total Posts", exact: true })).toHaveCount(0);
+    await expect(page.getByRole("table", { name: "Accounts", exact: true })).toHaveCount(0);
+    await expect(page.getByLabel("Account cards", { exact: true })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: "Create User", exact: true })).toHaveCount(0);
+    for (const name of ["Users", "Dashboard", "Manage Users"]) {
+      await expect(page.getByRole("link", { name, exact: true })).toHaveCount(0);
+    }
+    expect(await stored(page)).toEqual(records);
+    await nav(page, testInfo, "Write");
+    await expect(page.getByRole("heading", { name: "Write a Blog", exact: true })).toBeVisible();
+    await nav(page, testInfo, "All Blogs");
+    await expect(page).toHaveURL(/\/blogs$/);
+    await page.getByRole("link", { name: records.posts[0].title, exact: true }).click();
+    await expect(page.getByRole("heading", { name: records.posts[0].title, exact: true })).toBeVisible();
+    expect(await stored(page)).toEqual(records);
+  });
+
   test(`guest entry ${route} requires login`, async ({ page }) => {
     await page.goto(route);
     await expect(page).toHaveURL(/\/login$/);

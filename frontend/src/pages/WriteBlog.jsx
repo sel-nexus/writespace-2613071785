@@ -1,6 +1,6 @@
 /** Compose or revise plain-text posts, preserving content exactly as entered. */
 import { useEffect, useState } from "react";
-import { Link, Navigate, useNavigate, useParams } from "react-router-dom";
+import { Navigate, useLocation, useNavigate, useParams } from "react-router-dom";
 import { getSession } from "../utils/auth.js";
 import {
   canEditPost,
@@ -16,6 +16,7 @@ import {
 export default function WriteBlog() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const post = id ? getPostById(id) : null;
   const [title, setTitle] = useState(post?.title || "");
   const [content, setContent] = useState(post?.content || "");
@@ -138,12 +139,20 @@ export default function WriteBlog() {
           >
             Save
           </button>
-          <Link
-            to={id ? `/blog/${id}` : "/blogs"}
+          <button
+            type="button"
+            onClick={() => {
+              // Direct entries have no app origin; never trust a state-supplied URL.
+              if (location.key === "default") {
+                navigate(id ? `/blog/${id}` : "/blogs", { replace: true });
+              } else {
+                navigate(-1);
+              }
+            }}
             className="rounded-lg px-4 py-2 text-center font-medium text-slate-500 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2"
           >
             Cancel
-          </Link>
+          </button>
         </div>
       </form>
     </main>

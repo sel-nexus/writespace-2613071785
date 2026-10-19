@@ -136,6 +136,65 @@ test("empty public home exposes exact copy and both guest hero actions", async (
   ).toBeNull();
 });
 
+/** E-17 limitation: configured Chromium contexts expose no standard Playwright
+ * permission for denying first-party localStorage. No managed browser policy is
+ * configured, and browser-policy probing is not run in this scoped edit-only task.
+ * Native denial remains unverified; existing unit storage spies cover the error
+ * boundary only, not browser denial. Do not substitute app or Storage mocks here.
+ */
+test("E-17 malformed native posts storage stays empty through public discovery and admin reading", async ({
+  page,
+}) => {
+  const raw = '{"posts":';
+  await page.addInitScript((malformed) => {
+    localStorage.setItem("writespace_posts", malformed);
+  }, raw);
+  await page.goto("/");
+  const latest = page.getByRole("region", { name: "Latest from the Blog" });
+  await expect(
+    latest.getByText("No posts yet — check back soon!", { exact: true }),
+  ).toBeVisible();
+  await expect(latest.getByRole("article")).toHaveCount(0);
+  await expect(
+    page
+      .getByRole("complementary", { name: "Inside your writing space" })
+      .getByRole("article"),
+  ).toHaveCount(0);
+  expect(
+    await page.evaluate(() => localStorage.getItem("writespace_posts")),
+  ).toBe(raw);
+
+  await page.getByRole("link", { name: "Start Reading", exact: true }).click();
+  await expect(page).toHaveURL(/\/login$/);
+  await login(page, "admin", "admin");
+  await expect(page).toHaveURL(/\/admin$/);
+  await expect(
+    page.getByRole("heading", { name: "Admin Dashboard", exact: true }),
+  ).toBeVisible();
+  const toggle = page.getByRole("button", { name: "Toggle navigation" });
+  const mobile = await toggle.isVisible();
+  if (mobile) await toggle.click();
+  const navigation = page.getByRole("navigation", {
+    name: mobile ? "Mobile navigation" : "Account navigation",
+    exact: true,
+  });
+  await navigation
+    .getByRole("link", { name: "All Blogs", exact: true })
+    .click();
+  await expect(page).toHaveURL(/\/blogs$/);
+  await expect(
+    page.getByRole("heading", { name: "All Blogs", exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByText("No blogs yet. Be the first to write one!", { exact: true }),
+  ).toBeVisible();
+  await expect(page.locator("main").getByRole("article")).toHaveCount(0);
+  await expect(page.getByRole("region", { name: "All posts" })).toHaveCount(0);
+  expect(
+    await page.evaluate(() => localStorage.getItem("writespace_posts")),
+  ).toBe(raw);
+});
+
 test("latest three use real data, persist and redirect a guest preview to login", async ({
   page,
 }, testInfo) => {

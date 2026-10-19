@@ -378,6 +378,13 @@ describe("public landing and App wiring", () => {
     expect(screen.getByText(/Passwords are stored in plaintext/)).toBeVisible();
     expect(screen.getByText(/not secure authentication/)).toBeVisible();
     expect(screen.getByText("No posts yet — check back soon!")).toBeVisible();
+    const preview = screen.getByRole("complementary", {
+      name: "Inside your writing space",
+    });
+    expect(
+      within(preview).getByText("Every story starts with a little space.")
+        .parentElement.parentElement,
+    ).toHaveClass("shadow-xl", "motion-safe:animate-[bounce_8s_infinite]");
     const footer = screen.getByRole("contentinfo");
     expect(footer).toHaveClass("bg-slate-900");
     expect(
@@ -407,6 +414,13 @@ describe("public landing and App wiring", () => {
     ).toEqual(["Newest", "Second", "Third"]);
     expect(screen.queryByText("Oldest")).not.toBeInTheDocument();
     expect(within(latest).getAllByRole("article")).toHaveLength(3);
+    const preview = screen.getByRole("complementary", {
+      name: "Inside your writing space",
+    });
+    expect(within(preview).getByRole("article").parentElement).toHaveClass(
+      "shadow-xl",
+      "motion-safe:animate-[bounce_8s_infinite]",
+    );
     expect(localStorage.getItem("writespace_posts")).toBe(raw);
   });
 

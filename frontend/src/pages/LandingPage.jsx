@@ -92,13 +92,15 @@ export default function LandingPage({ session = null }) {
                 <BlogCard post={posts[0]} session={session} />
               </div>
             ) : (
-              <div className="rounded-2xl border-t-4 border-indigo-500 bg-white p-8 shadow-lg">
-                <p className="font-[Georgia] text-3xl leading-snug text-slate-800">
-                  Every story starts with a little space.
-                </p>
-                <p className="mt-4 leading-relaxed text-slate-600">
-                  Your first words belong here. Create a local account to begin.
-                </p>
+              <div className="shadow-xl motion-safe:animate-[bounce_8s_infinite]">
+                <div className="rounded-2xl border-t-4 border-indigo-500 bg-white p-8 shadow-lg">
+                  <p className="font-[Georgia] text-3xl leading-snug text-slate-800">
+                    Every story starts with a little space.
+                  </p>
+                  <p className="mt-4 leading-relaxed text-slate-600">
+                    Your first words belong here. Create a local account to begin.
+                  </p>
+                </div>
               </div>
             )}
           </aside>

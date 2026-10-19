@@ -401,13 +401,17 @@ describe("StatCard and UserRow", () => {
         <StatCard label="Total Posts" value={0} color={color} />,
       );
       expect(
-        screen.getByRole("region", { name: "Total Posts" }),
-      ).toHaveTextContent("0");
+        screen
+          .getByRole("region", { name: "Total Posts" })
+          .querySelector(":scope > p").textContent,
+      ).toBe("0");
       expect(document.querySelector(`.bg-${color}-100`)).not.toBeNull();
       rerender(<StatCard label="Total Posts" value={123} />);
       expect(
-        screen.getByRole("region", { name: "Total Posts" }),
-      ).toHaveTextContent("123");
+        screen
+          .getByRole("region", { name: "Total Posts" })
+          .querySelector(":scope > p").textContent,
+      ).toBe("123");
     },
   );
 
@@ -670,8 +674,10 @@ describe("AdminDashboard interactions and routes", () => {
       ["Total users", 3],
     ]) {
       expect(
-        screen.getByRole("region", { name: label, exact: true }),
-      ).toHaveTextContent(String(value));
+        screen
+          .getByRole("region", { name: label, exact: true })
+          .querySelector(":scope > p").textContent,
+      ).toBe(String(value));
     }
     expect(screen.getByText(/Product clarification/)).toHaveTextContent(
       "duplicate product labels",
@@ -709,11 +715,15 @@ describe("AdminDashboard interactions and routes", () => {
       routed(<AdminDashboard />);
       expect(screen.getByText(/No posts yet. Write a new post/)).toBeVisible();
       expect(
-        screen.getByRole("region", { name: "Total Posts" }),
-      ).toHaveTextContent("0");
+        screen
+          .getByRole("region", { name: "Total Posts" })
+          .querySelector(":scope > p").textContent,
+      ).toBe("0");
       expect(
-        screen.getByRole("region", { name: "Total Users", exact: true }),
-      ).toHaveTextContent("1");
+        screen
+          .getByRole("region", { name: "Total Users", exact: true })
+          .querySelector(":scope > p").textContent,
+      ).toBe("1");
       expect(
         screen.getByRole("heading", { level: 1 }).parentElement,
       ).toHaveClass("from-violet-600", "to-indigo-600");
@@ -746,8 +756,10 @@ describe("AdminDashboard interactions and routes", () => {
       screen.getByRole("link", { name: "Post 2", exact: true }),
     ).toBeVisible();
     expect(
-      screen.getByRole("region", { name: "Total Posts" }),
-    ).toHaveTextContent("6");
+      screen
+        .getByRole("region", { name: "Total Posts" })
+        .querySelector(":scope > p").textContent,
+    ).toBe("6");
   });
 
   it.each(["missing", "stale"])(

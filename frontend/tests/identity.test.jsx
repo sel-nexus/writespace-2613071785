@@ -397,6 +397,54 @@ describe("auth.js login and self-registration", () => {
     expect(getUsers()).toHaveLength(1);
   });
 
+  it("self-registers long fields without truncation and rereads the exact account and session before later login", () => {
+    // Large valid samples exercise acceptance, not an invented maximum length.
+    const longValues = {
+      displayName: `Display-${"D".repeat(8192)}-end`,
+      username: `username-${"u".repeat(8192)}-end`,
+      password: ` password-${"p".repeat(8192)}-end `,
+      confirmPassword: ` password-${"p".repeat(8192)}-end `,
+    };
+    expect(validateRegistration(longValues)).toEqual({});
+    const result = register(longValues);
+    const saved = getUsers()[0];
+    expect(isId(saved.id)).toBe(true);
+    expect(new Date(saved.createdAt).toISOString()).toBe(saved.createdAt);
+    const expectedAccount = {
+      id: saved.id,
+      displayName: longValues.displayName,
+      username: longValues.username,
+      password: longValues.password,
+      role: "user",
+      createdAt: saved.createdAt,
+    };
+    const expectedSession = {
+      userId: saved.id,
+      displayName: longValues.displayName,
+      username: longValues.username,
+      role: "user",
+    };
+    expect(getUsers()).toEqual([expectedAccount]);
+    expect(JSON.parse(localStorage.getItem("writespace_users"))).toEqual([
+      expectedAccount,
+    ]);
+    expect(result).toEqual(expectedSession);
+    expect(getSession()).toEqual(expectedSession);
+    expect(JSON.parse(localStorage.getItem("writespace_session"))).toEqual(
+      expectedSession,
+    );
+    clearSession();
+    expect(getSession()).toBeNull();
+    expect(login(longValues.username, longValues.password)).toEqual(
+      expectedSession,
+    );
+    expect(getSession()).toEqual(expectedSession);
+    expect(JSON.parse(localStorage.getItem("writespace_session"))).toEqual(
+      expectedSession,
+    );
+    expect(getUsers()).toEqual([expectedAccount]);
+  });
+
   it.each(["displayName", "username", "password", "confirmPassword"])(
     "rejects absent or whitespace registration field %s",
     (field) => {
@@ -679,6 +727,66 @@ describe("Navbar.jsx", () => {
       screen.getByRole("img", { name: "Admin avatar" }),
     ).toBeInTheDocument();
   });
+
+  it.each([identity, ADMIN_SESSION])(
+    "filters genuine custom destinations for $role and closes mobile navigation after an accepted link",
+    async (session) => {
+      const user = userEvent.setup();
+      const links = [
+        { to: "/help", label: "Help" },
+        { to: "/reading-list", label: "Reading List", role: "user" },
+        { to: "/moderation", label: "Moderation", role: "admin" },
+      ];
+      const matching = links.find((link) => link.role === session.role);
+      const wrongRole = links.find(
+        (link) => link.role && link.role !== session.role,
+      );
+      routed(
+        <Navbar session={session} onSessionChange={vi.fn()} links={links} />,
+      );
+      const desktop = within(
+        screen.getByRole("navigation", {
+          name: "Account navigation",
+          exact: true,
+        }),
+      );
+      for (const link of [links[0], matching]) {
+        expect(desktop.getByRole("link", { name: link.label })).toBeVisible();
+        expect(desktop.getByRole("link", { name: link.label })).toHaveAttribute(
+          "href",
+          link.to,
+        );
+      }
+      expect(
+        screen.queryByRole("link", { name: wrongRole.label }),
+      ).not.toBeInTheDocument();
+      const toggle = screen.getByRole("button", { name: "Toggle navigation" });
+      expect(toggle).toHaveAttribute("aria-expanded", "false");
+      await user.click(toggle);
+      expect(toggle).toHaveAttribute("aria-expanded", "true");
+      const mobile = within(
+        screen.getByRole("navigation", { name: "Mobile navigation" }),
+      );
+      for (const link of [links[0], matching]) {
+        expect(mobile.getByRole("link", { name: link.label })).toBeVisible();
+        expect(mobile.getByRole("link", { name: link.label })).toHaveAttribute(
+          "href",
+          link.to,
+        );
+      }
+      expect(
+        screen.queryByRole("link", { name: wrongRole.label }),
+      ).not.toBeInTheDocument();
+      await user.click(mobile.getByRole("link", { name: matching.label }));
+      expect(screen.getByLabelText("Current route").textContent).toBe(
+        matching.to,
+      );
+      expect(toggle).toHaveAttribute("aria-expanded", "false");
+      expect(
+        screen.queryByRole("navigation", { name: "Mobile navigation" }),
+      ).not.toBeInTheDocument();
+    },
+  );
 
   it("keeps the persisted session and reports failed logout instead of pretending success", async () => {
     setSession(ADMIN_SESSION);

@@ -1,0 +1,157 @@
+{
+  "accessibility": {
+    "role": "WebArea",
+    "name": "WriteSpace",
+    "children": [
+      {
+        "role": "link",
+        "name": "Skip to content"
+      },
+      {
+        "role": "link",
+        "name": "WriteSpace"
+      },
+      {
+        "role": "link",
+        "name": "Login"
+      },
+      {
+        "role": "link",
+        "name": "Get Started"
+      },
+      {
+        "role": "text",
+        "name": "A LITTLE ROOM FOR BIG IDEAS"
+      },
+      {
+        "role": "heading",
+        "name": "WriteSpace",
+        "level": 1
+      },
+      {
+        "role": "text",
+        "name": "Your thoughts. Your space. Beautifully simple."
+      },
+      {
+        "role": "text",
+        "name": "A place to put words down and discover what others have written. Just plain text, a quiet page, and space to begin."
+      },
+      {
+        "role": "link",
+        "name": "Start Reading"
+      },
+      {
+        "role": "link",
+        "name": "Get Started Free"
+      },
+      {
+        "role": "text",
+        "name": "Local demo only. Passwords are stored in plaintext in this browser; never use real passwords or sensitive data. Client-side access controls are not secure authentication."
+      },
+      {
+        "role": "text",
+        "name": "Words from this browser"
+      },
+      {
+        "role": "text",
+        "name": "Every story starts with a little space."
+      },
+      {
+        "role": "text",
+        "name": "Your first words belong here. Create a local account to begin."
+      },
+      {
+        "role": "heading",
+        "name": "Less in the way. More on the page.",
+        "level": 2
+      },
+      {
+        "role": "text",
+        "name": "01"
+      },
+      {
+        "role": "heading",
+        "name": "Write Freely",
+        "level": 3
+      },
+      {
+        "role": "text",
+        "name": "Plain-text writing, without distractions. Give your ideas room to unfold."
+      },
+      {
+        "role": "text",
+        "name": "02"
+      },
+      {
+        "role": "heading",
+        "name": "Private & Local",
+        "level": 3
+      },
+      {
+        "role": "text",
+        "name": "Your data lives in this browser. Nothing is shared or synchronized across devices."
+      },
+      {
+        "role": "text",
+        "name": "03"
+      },
+      {
+        "role": "heading",
+        "name": "Instant & Fast",
+        "level": 3
+      },
+      {
+        "role": "text",
+        "name": "No server to wait for. Open your space and get straight to your thoughts."
+      },
+      {
+        "role": "text",
+        "name": "THE LATEST WORDS"
+      },
+      {
+        "role": "heading",
+        "name": "Latest from the Blog",
+        "level": 2
+      },
+      {
+        "role": "text",
+        "name": "No posts yet — check back soon!"
+      },
+      {
+        "role": "text",
+        "name": "© "
+      },
+      {
+        "role": "text",
+        "name": "2026"
+      },
+      {
+        "role": "text",
+        "name": " WriteSpace"
+      },
+      {
+        "role": "link",
+        "name": "Home"
+      },
+      {
+        "role": "link",
+        "name": "All Blogs"
+      },
+      {
+        "role": "link",
+        "name": "Login"
+      },
+      {
+        "role": "link",
+        "name": "Register"
+      }
+    ]
+  },
+  "styles": {
+    "font": "ui-sans-serif, system-ui, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+    "heading": "Georgia",
+    "width": 393,
+    "overflow": false,
+    "mainDisplay": "block"
+  }
+}

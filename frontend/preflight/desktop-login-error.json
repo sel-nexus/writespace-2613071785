@@ -1,0 +1,136 @@
+{
+  "accessibility": {
+    "role": "WebArea",
+    "name": "WriteSpace",
+    "children": [
+      {
+        "role": "link",
+        "name": "Skip to content"
+      },
+      {
+        "role": "link",
+        "name": "WriteSpace"
+      },
+      {
+        "role": "link",
+        "name": "Login"
+      },
+      {
+        "role": "link",
+        "name": "Get Started"
+      },
+      {
+        "role": "text",
+        "name": "A PLACE FOR YOUR WORDS"
+      },
+      {
+        "role": "heading",
+        "name": "Your thoughts. Your space.",
+        "level": 1
+      },
+      {
+        "role": "text",
+        "name": "Beautifully simple. A browser-local writing demo, starting with an account that lives on this device."
+      },
+      {
+        "role": "text",
+        "name": "Demo only · not secure authentication"
+      },
+      {
+        "role": "text",
+        "name": "Passwords are stored in plaintext in this browser. Never use a real password or sensitive data. Accounts do not sync across devices."
+      },
+      {
+        "role": "text",
+        "name": "Demo administrator: username "
+      },
+      {
+        "role": "text",
+        "name": "admin"
+      },
+      {
+        "role": "text",
+        "name": " / password"
+      },
+      {
+        "role": "text",
+        "name": " "
+      },
+      {
+        "role": "text",
+        "name": "admin"
+      },
+      {
+        "role": "text",
+        "name": "."
+      },
+      {
+        "role": "text",
+        "name": "WriteSpace"
+      },
+      {
+        "role": "heading",
+        "name": "Welcome back",
+        "level": 2
+      },
+      {
+        "role": "text",
+        "name": "Log in to your local account."
+      },
+      {
+        "role": "text",
+        "name": "Username"
+      },
+      {
+        "role": "textbox",
+        "name": "Username",
+        "description": "Username is required.",
+        "required": true,
+        "invalid": "true"
+      },
+      {
+        "role": "text",
+        "name": "Username is required."
+      },
+      {
+        "role": "text",
+        "name": "Password"
+      },
+      {
+        "role": "textbox",
+        "name": "Password",
+        "description": "Password is required.",
+        "required": true,
+        "invalid": "true"
+      },
+      {
+        "role": "text",
+        "name": "Password is required."
+      },
+      {
+        "role": "button",
+        "name": "Login",
+        "focused": true
+      },
+      {
+        "role": "text",
+        "name": "New here?"
+      },
+      {
+        "role": "text",
+        "name": " "
+      },
+      {
+        "role": "link",
+        "name": "Register"
+      }
+    ]
+  },
+  "styles": {
+    "font": "ui-sans-serif, system-ui, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+    "heading": "Georgia",
+    "width": 1280,
+    "overflow": false,
+    "mainDisplay": "grid"
+  }
+}

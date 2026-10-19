@@ -1,0 +1,109 @@
+{
+  "accessibility": {
+    "role": "WebArea",
+    "name": "WriteSpace",
+    "children": [
+      {
+        "role": "link",
+        "name": "Skip to content"
+      },
+      {
+        "role": "link",
+        "name": "WriteSpace"
+      },
+      {
+        "role": "link",
+        "name": "All Blogs"
+      },
+      {
+        "role": "link",
+        "name": "Write"
+      },
+      {
+        "role": "link",
+        "name": "Dashboard"
+      },
+      {
+        "role": "link",
+        "name": "Users"
+      },
+      {
+        "role": "button",
+        "name": "Account options for Admin"
+      },
+      {
+        "role": "text",
+        "name": "WriteSpace administration"
+      },
+      {
+        "role": "heading",
+        "name": "Admin Dashboard",
+        "level": 1
+      },
+      {
+        "role": "text",
+        "name": "Oversee the writing and accounts stored in this browser."
+      },
+      {
+        "role": "text",
+        "name": "Total Posts"
+      },
+      {
+        "role": "text",
+        "name": "0"
+      },
+      {
+        "role": "text",
+        "name": "Total Users"
+      },
+      {
+        "role": "text",
+        "name": "1"
+      },
+      {
+        "role": "text",
+        "name": "Total Admins"
+      },
+      {
+        "role": "text",
+        "name": "1"
+      },
+      {
+        "role": "text",
+        "name": "Total users"
+      },
+      {
+        "role": "text",
+        "name": "1"
+      },
+      {
+        "role": "text",
+        "name": "Product clarification: “Total Users” and “Total users” are duplicate product labels; both count all accounts, including the built-in admin. Total Admins also includes the built-in admin."
+      },
+      {
+        "role": "link",
+        "name": "Write New Post"
+      },
+      {
+        "role": "link",
+        "name": "Manage Users"
+      },
+      {
+        "role": "heading",
+        "name": "Recent Posts",
+        "level": 2
+      },
+      {
+        "role": "text",
+        "name": "No posts yet. Write a new post to get started."
+      }
+    ]
+  },
+  "styles": {
+    "font": "ui-sans-serif, system-ui, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+    "heading": "Georgia",
+    "width": 1280,
+    "overflow": false,
+    "mainDisplay": "block"
+  }
+}

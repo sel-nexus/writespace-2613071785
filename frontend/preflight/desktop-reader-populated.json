@@ -1,0 +1,76 @@
+{
+  "accessibility": {
+    "role": "WebArea",
+    "name": "WriteSpace",
+    "children": [
+      {
+        "role": "link",
+        "name": "Skip to content"
+      },
+      {
+        "role": "link",
+        "name": "WriteSpace"
+      },
+      {
+        "role": "link",
+        "name": "All Blogs"
+      },
+      {
+        "role": "link",
+        "name": "Write"
+      },
+      {
+        "role": "link",
+        "name": "Dashboard"
+      },
+      {
+        "role": "link",
+        "name": "Users"
+      },
+      {
+        "role": "button",
+        "name": "Account options for Admin"
+      },
+      {
+        "role": "heading",
+        "name": "A page for your words",
+        "level": 1
+      },
+      {
+        "role": "text",
+        "name": "👑"
+      },
+      {
+        "role": "text",
+        "name": "Admin"
+      },
+      {
+        "role": "text",
+        "name": "Oct 19, 2026"
+      },
+      {
+        "role": "text",
+        "name": "This is a real browser-local preflight post.\nPlain text keeps the focus on writing."
+      },
+      {
+        "role": "link",
+        "name": "Edit"
+      },
+      {
+        "role": "button",
+        "name": "Delete"
+      },
+      {
+        "role": "link",
+        "name": "Back to All Posts"
+      }
+    ]
+  },
+  "styles": {
+    "font": "ui-sans-serif, system-ui, sans-serif, \"Apple Color Emoji\", \"Segoe UI Emoji\", \"Segoe UI Symbol\", \"Noto Color Emoji\"",
+    "heading": "Georgia",
+    "width": 1280,
+    "overflow": false,
+    "mainDisplay": "block"
+  }
+}
